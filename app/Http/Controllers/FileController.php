@@ -2,28 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\CsvFilePerformer;
+use App\Services\JsonFileReader;
+use App\Services\PhoneListPerfomer;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller
 {
-    public function create(Request $request)
+    public function index(Request $request, JsonFileReader $reader, PhoneListPerfomer $phone, CsvFilePerformer $file)
     {
-        $data = $request->all();
+        $phone_records = $reader->readJson('files/phones.json');
 
-        for ($row = 0; $row < $data['rows']; $row++) {
-            for ($led_number = 0; $led_number < $data['leds_in_row']; $led_number++) {
-                $t = $this->physicalLedNumber($led_number, $row, $data['leds_in_row']);
+        $file_contents = $file->perform($phone, $phone_records);
 
-                echo "[LED: $led_number, ROW: $row]\n";
-                echo "{{$t}}\n";
-            }
+        Storage::put(
+            'file.csv',
+            $file_contents
+        );
 
-            echo '<br/>';
-        }
-    }
-
-    function physicalLedNumber($led, $row, $leds_in_row)
-    {
-        return $led + $leds_in_row * $row;
+        return response()->download(storage_path('app/file.csv'));
     }
 }

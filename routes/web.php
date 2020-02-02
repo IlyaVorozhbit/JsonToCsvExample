@@ -17,5 +17,4 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::post('create_file', 'FileController@create')->name('file.create');
-Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/csv', 'FileController@index')->name('file.index');
